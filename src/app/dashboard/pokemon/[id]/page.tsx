@@ -2,14 +2,9 @@ import { Metadata } from "next";
 import Image from "next/image";
 import Link from "next/link";
 
-interface Props {
-    params: {
-        id: string;
-        name: string;
-    }
-}
+type Props = Promise<{ id: string; name: string; }>
 
-const typesColors: any = {
+const typesColors: Record<string, string> = {
     'fire': 'bg-[#c43d25]',
     'water': 'bg-[#6890F0]',
     'electric': 'bg-[#F8D030]',
@@ -30,8 +25,8 @@ const typesColors: any = {
     'stellar': 'bg-[#35ACE7]',
 }
 
-export async function generateMetadata({ params }: Props): Promise<Metadata> {
-    const { id } = await params
+export async function generateMetadata(props: { params: Props }): Promise<Metadata> {
+    const { id } = await props.params
     const { name } = await getPokemon(id)
     return {
         title: name,
@@ -39,15 +34,15 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
     }
 }
 
-const getPokemon = async (id: string): Promise<any> => {
+const getPokemon = async (id: string): Promise<{ id: string; name: string; base_experience: string; types: [{ slot: string; type: { name: string; } }] }> => {
     const resp = await fetch(`https://pokeapi.co/api/v2/pokemon/${id}`)
     const data = await resp.json();
     console.log(data.name);
     return data;
 }
 
-const SinglePokemonPage = async ({ params }: Props) => {
-    const { id } = await params
+const SinglePokemonPage = async (props: { params: Props }) => {
+    const { id } = await props.params
     const pokemon = await getPokemon(id)
     return (
         <div className="w-80 bg-[#D0A8D6] border-4 border-[#91519D] rounded-lg p-2 shadow-lg font-mono">
@@ -83,7 +78,7 @@ const SinglePokemonPage = async ({ params }: Props) => {
                 <p><strong>OT:</strong> MAY</p>
                 <p><strong>ID No:</strong> 61394</p>
                 <p><strong>TYPE:</strong> {
-                    pokemon.types.map((elem: any) => {
+                    pokemon.types.map((elem: { slot: string; type: { name: string; } }) => {
                         return <span key={elem.slot} className={`${typesColors[elem.type.name]} text-white px-1 rounded`}>{elem.type.name}</span>
                     })
                 }</p>
