@@ -1,14 +1,8 @@
-function sumar(num1, num2){
-    return num1 + num2
-}
+
+const myVar = 'this is'
+console.log(`${myVar} variable`)
 
 
 
 
-test('adds 1 + 2 to equal 3', () => {
-
-const expectedResult = 3;
-
-expect(sumar(1,2)).toBe(expectedResult)
-
-});
+for example, this variable tells me actually that we do not need to do that!!!!
