@@ -1,32 +1,15 @@
+import { GetPokemonResponse, PokemonTypes, PokemonSimpleData, typesColors } from "@/pokemons";
 import { Metadata } from "next";
 import Image from "next/image";
 import Link from "next/link";
+import { notFound } from "next/navigation";
 
-type Props = Promise<{ id: string; name: string; }>
-
-const typesColors: Record<string, string> = {
-    'fire': 'bg-[#c43d25]',
-    'water': 'bg-[#6890F0]',
-    'electric': 'bg-[#F8D030]',
-    'grass': 'bg-[#78C850]',
-    'ice': 'bg-[#98D8D8]',
-    'fighting': 'bg-[#C03028]',
-    'poison': 'bg-[#A040A0]',
-    'ground': 'bg-[#E0C068]',
-    'flying': 'bg-[#A890F0]',
-    'psychic': 'bg-[#F85888]',
-    'bug': 'bg-[#A8B820]',
-    'rock': 'bg-[#B8A038]',
-    'ghost': 'bg-[#705898]',
-    'dragon': 'bg-[#7038F8]',
-    'dark': 'bg-[#705848]',
-    'steel': 'bg-[#B8B8D0]',
-    'fairy': 'bg-[#F0B6BC]',
-    'stellar': 'bg-[#35ACE7]',
+interface Props {
+    params: Promise<PokemonSimpleData>
 }
 
-export async function generateMetadata(props: { params: Props }): Promise<Metadata> {
-    const { id } = await props.params
+export async function generateMetadata({ params }: Props): Promise<Metadata> {
+    const { id } = await params
     const { name } = await getPokemon(id)
     return {
         title: name,
@@ -34,15 +17,19 @@ export async function generateMetadata(props: { params: Props }): Promise<Metada
     }
 }
 
-const getPokemon = async (id: string): Promise<{ id: string; name: string; base_experience: string; types: [{ slot: string; type: { name: string; } }] }> => {
-    const resp = await fetch(`https://pokeapi.co/api/v2/pokemon/${id}`)
-    const data = await resp.json();
-    console.log(data.name);
-    return data;
+const getPokemon = async (id: string): Promise<GetPokemonResponse> => {
+    try {
+        const resp = await fetch(`https://pokeapi.co/api/v2/pokemon/${id}`)
+        const data = await resp.json();
+        return data;
+    } catch (error) {
+        console.log('here');
+        notFound();
+    }
 }
 
-const SinglePokemonPage = async (props: { params: Props }) => {
-    const { id } = await props.params
+const SinglePokemonPage = async ({ params }: Props) => {
+    const { id } = await params
     const pokemon = await getPokemon(id)
     return (
         <div className="w-80 bg-[#D0A8D6] border-4 border-[#91519D] rounded-lg p-2 shadow-lg font-mono">
@@ -78,7 +65,7 @@ const SinglePokemonPage = async (props: { params: Props }) => {
                 <p><strong>OT:</strong> MAY</p>
                 <p><strong>ID No:</strong> 61394</p>
                 <p><strong>TYPE:</strong> {
-                    pokemon.types.map((elem: { slot: string; type: { name: string; } }) => {
+                    pokemon.types.map((elem: PokemonTypes) => {
                         return <span key={elem.slot} className={`${typesColors[elem.type.name]} text-white px-1 rounded`}>{elem.type.name}</span>
                     })
                 }</p>
